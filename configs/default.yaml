@@ -1,0 +1,57 @@
+# Perceptra Detector Configuration
+
+detector:
+  # Model configuration
+  model_path: "yolov8n.pt"
+  backend: null  # Auto-detect from file extension
+  
+  # Device configuration
+  device: null  # Auto-detect (cuda if available, else cpu)
+  
+  # Detection parameters
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  
+  # Performance
+  auto_warmup: false
+  warmup_iterations: 3
+
+api:
+  # Server configuration
+  host: "0.0.0.0"
+  port: 8000
+  
+  # CORS settings
+  enable_cors: true
+  allowed_origins:
+    - "*"
+  
+  # Models to load at startup
+  models:
+    yolo: "models/yolov8n.pt"
+    # detr: "models/detr-resnet-50.pth"
+    # rt-detr: "models/rtdetr-l.pt"
+  
+  # Request limits
+  max_batch_size: 32
+  max_file_size_mb: 10
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: null  # Set to path for file logging
+
+visualization:
+  # Default visualization settings
+  show_confidence: true
+  show_class_name: true
+  thickness: 2
+  font_scale: 0.5
+
+processing:
+  # Video processing defaults
+  skip_frames: 0
+  max_frames: null
+  
+  # Batch processing
+  batch_size: 8

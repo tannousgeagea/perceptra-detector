@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Main detection API service
+  detector-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: perceptra-detector-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount models directory
+      - ./models:/app/models:ro
+      # Mount config
+      - ./configs/production.yaml:/app/config.yaml:ro
+    environment:
+      - PERCEPTRA_DETECTOR_DEVICE=cuda
+      - PERCEPTRA_API_HOST=0.0.0.0
+      - PERCEPTRA_API_PORT=8000
+    command: >
+      perceptra-detector serve
+      -m yolo:/app/models/yolov8n.pt
+      -m detr:/app/models/detr-resnet-50.pth
+      --host 0.0.0.0
+      --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    # Uncomment for GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Optional: Redis for caching (future feature)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: perceptra-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   restart: unless-stopped
+
+  # Optional: Nginx reverse proxy
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: perceptra-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - detector-api
+  #   restart: unless-stopped
+
+# volumes:
+#   redis-data:
+
+networks:
+  default:
+    name: perceptra-network
