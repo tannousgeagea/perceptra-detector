@@ -195,4 +195,4 @@ def normalize_image(
     """
     image = image.astype(np.float32) / 255.0
     image = (image - np.array(mean)) / np.array(std)
-    return image
+    return image.astype(np.float32)

@@ -295,5 +295,10 @@ def list_backends():
             click.echo(f"    Extensions: {', '.join(exts)}")
 
 
-if __name__ == '__main__':
+def main():
+    """Main entry point for CLI."""
     cli()
+
+
+if __name__ == '__main__':
+    main()

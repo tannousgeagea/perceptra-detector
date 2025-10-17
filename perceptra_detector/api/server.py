@@ -195,7 +195,7 @@ def create_app(
             try:
                 if isinstance(config, str):
                     # Simple path string
-                    service.add_model(name, config)
+                    service.add_model(name, config, backend=name)
                 elif isinstance(config, dict):
                     # Config dict with additional parameters
                     model_path = config.pop('path', config.pop('model_path', None))
