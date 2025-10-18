@@ -200,6 +200,9 @@ def create_app(
                     model_path = config.pop('path', config.pop('model_path', None))
                     if model_path:
                         service.add_model(name, model_path, **config)
+                    elif 'model_size' in config and config.get('backend') == 'rf-detr':
+                        # Pretrained RF-DETR model - no path needed
+                        service.add_model(name, model_path=None, **config)
                     else:
                         logger.error(f"No model path specified for {name}")
             except Exception as e:

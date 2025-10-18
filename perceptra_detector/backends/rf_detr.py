@@ -76,7 +76,7 @@ class RFDETRDetector(BaseDetector):
             raise FileNotFoundError(f"Model file not found: {self.model_path}")
 
         try:
-            from rfdetr import RFDETRNano, RFDETRSmall, RFDETRMedium, RFDETRLarge
+            from rfdetr import RFDETRNano, RFDETRSmall, RFDETRMedium, RFDETRLarge, RFDETRBase
             from rfdetr.util.coco_classes import COCO_CLASSES
         except ImportError:
             raise ImportError(
@@ -88,6 +88,7 @@ class RFDETRDetector(BaseDetector):
         model_classes = {
             'nano': RFDETRNano,
             'small': RFDETRSmall,
+            'base': RFDETRBase,
             'medium': RFDETRMedium,
             'large': RFDETRLarge,
         }

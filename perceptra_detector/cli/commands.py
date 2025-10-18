@@ -252,8 +252,12 @@ def serve(host, port, models, reload, workers):
                 models_config[name] = path
             elif len(parts) == 3:
                 # Format: name:backend:path (explicit backend)
-                name, backend, path = parts
-                models_config[name] = {'path': path, 'backend': backend}
+                name, backend, path_or_size = parts
+                # Check if it's a model size (for pretrained models like RF-DETR)
+                if path_or_size in ['nano', 'small', 'base', 'medium', 'large'] and backend == 'rf-detr':
+                    models_config[name] = {'backend': backend, 'model_size': path_or_size}
+                else:
+                    models_config[name] = {'path': path_or_size, 'backend': backend}
             else:
                 click.echo(f"✗ Invalid model specification: {model_spec}", err=True)
                 click.echo("  Format: name:path or name:backend:path", err=True)
