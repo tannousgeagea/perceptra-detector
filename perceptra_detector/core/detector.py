@@ -54,13 +54,11 @@ class Detector:
         
         # Auto-detect backend if not specified
         if backend is None:
-            backend = DetectorRegistry.detect_backend(self.model_path)
-            if backend is None:
-                raise ValueError(
-                    f"Could not auto-detect backend for {self.model_path}. "
-                    f"Supported extensions: {DetectorRegistry.get_supported_extensions()}"
-                )
+            from .model_inspector import detect_backend as smart_detect
+            backend = smart_detect(self.model_path, hint=None)
             logger.info(f"Auto-detected backend: {backend}")
+        else:
+            logger.info(f"Using specified backend: {backend}")
         
         # Get backend class
         backend_class = DetectorRegistry.get_backend(backend)

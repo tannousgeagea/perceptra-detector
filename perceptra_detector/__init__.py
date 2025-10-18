@@ -14,7 +14,7 @@ from .core.schemas import (
 )
 
 # Import backends to register them
-from .backends import yolo, detr, rt_detr
+from .backends import rf_detr, yolo, detr
 
 __all__ = [
     "__version__",

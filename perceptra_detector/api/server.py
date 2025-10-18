@@ -189,13 +189,12 @@ def create_app(
             logger.error(f"Request failed: {e}")
             raise
     
-    # Load models if provided
     if models_config:
         for name, config in models_config.items():
             try:
                 if isinstance(config, str):
-                    # Simple path string
-                    service.add_model(name, config, backend=name)
+                    # Simple path string - auto-detect backend
+                    service.add_model(name, config)
                 elif isinstance(config, dict):
                     # Config dict with additional parameters
                     model_path = config.pop('path', config.pop('model_path', None))

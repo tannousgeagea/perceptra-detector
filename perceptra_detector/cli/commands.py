@@ -244,13 +244,20 @@ def serve(host, port, models, reload, workers):
         # Parse models
         models_config = {}
         for model_spec in models:
-            if ':' not in model_spec:
-                click.echo(f"✗ Invalid model specification: {model_spec}", err=True)
-                click.echo("  Format should be: name:path", err=True)
-                sys.exit(1)
+            parts = model_spec.split(':', 2)
             
-            name, path = model_spec.split(':', 1)
-            models_config[name] = path
+            if len(parts) == 2:
+                # Format: name:path (auto-detect backend)
+                name, path = parts
+                models_config[name] = path
+            elif len(parts) == 3:
+                # Format: name:backend:path (explicit backend)
+                name, backend, path = parts
+                models_config[name] = {'path': path, 'backend': backend}
+            else:
+                click.echo(f"✗ Invalid model specification: {model_spec}", err=True)
+                click.echo("  Format: name:path or name:backend:path", err=True)
+                sys.exit(1)
         
         if not models_config:
             click.echo("⚠ No models specified. Server will start but no models will be available.")

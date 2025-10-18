@@ -54,7 +54,7 @@ class RFDETRDetector(BaseDetector):
             **kwargs: Additional RF-DETR specific parameters
         """
         super().__init__(
-            model_path=model_path or Path(f"rfdetr-{model_size}.pt"),
+            model_path=Path(model_path) if model_path else Path(f"rfdetr-{model_size}.pth"),
             device=device,
             confidence_threshold=confidence_threshold,
             iou_threshold=iou_threshold,
@@ -66,8 +66,15 @@ class RFDETRDetector(BaseDetector):
         self.extra_kwargs = kwargs
         self._is_pretrained = model_path is None
         
+        logger.info(f"Model Path: {model_path}")
+        logger.info(f"Is Pretrained: {self._is_pretrained}")
+
     def load_model(self) -> None:
         """Load RF-DETR model using rfdetr package."""
+
+        if not self._is_pretrained and not self.model_path.exists():
+            raise FileNotFoundError(f"Model file not found: {self.model_path}")
+
         try:
             from rfdetr import RFDETRNano, RFDETRSmall, RFDETRMedium, RFDETRLarge
             from rfdetr.util.coco_classes import COCO_CLASSES
@@ -119,14 +126,16 @@ class RFDETRDetector(BaseDetector):
                 logger.warning("Could not extract class names from model, using COCO defaults")
                 self.class_names = COCO_CLASSES
         
+        logger.info(self.model)
+
         # Optimize for inference if requested
         if self.optimize_for_inference:
             logger.info("Optimizing model for inference (up to 2x speedup)")
-            self.model = self.model.optimize_for_inference()
+            self.model.optimize_for_inference()
         
         # Move to device if specified
-        if self.device:
-            self.model = self.model.to(self.device)
+        # if self.device:
+        #     self.model = self.model.to(self.device)
         
         self._model_info = {
             "framework": "rfdetr",

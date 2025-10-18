@@ -9,8 +9,13 @@ except ImportError:
     pass
 
 try:
+    from . import rf_detr
+except ImportError:
+    pass
+
+try:
     from . import detr
 except ImportError:
     pass
 
-__all__ = ["yolo", "detr"]
+__all__ = ["yolo", "rf_detr", "detr"]
