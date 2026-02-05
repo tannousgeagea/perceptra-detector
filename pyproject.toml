@@ -51,7 +51,7 @@ detr = [
     "transformers>=4.30.0",
 ]
 rfdetr = [
-    "rfdetr @ git+https://github.com/roboflow/rf-detr.git",
+    "rfdetr",
 ]
 # API server dependencies
 server = [
