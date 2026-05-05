@@ -72,9 +72,11 @@ class Detection:
     class_id: int
     class_name: str
     mask: Optional[np.ndarray] = None  # For instance segmentation
+    xy: Optional[List[List[float]]] = None   # Polygon contour in pixel coords [[x,y], ...]
+    xyn: Optional[List[List[float]]] = None  # Polygon contour normalized to [0,1]
     track_id: Optional[int] = None  # For tracking (future)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         result = {
@@ -83,17 +85,23 @@ class Detection:
             "class_id": int(self.class_id),
             "class_name": self.class_name,
         }
-        
+
         if self.track_id is not None:
             result["track_id"] = int(self.track_id)
-        
+
         if self.mask is not None:
             result["has_mask"] = True
-            result["mask_shape"] = self.mask.shape
-        
+            result["mask_shape"] = list(self.mask.shape)
+
+        if self.xy is not None:
+            result["xy"] = self.xy
+
+        if self.xyn is not None:
+            result["xyn"] = self.xyn
+
         if self.metadata:
             result["metadata"] = self.metadata
-        
+
         return result
 
 

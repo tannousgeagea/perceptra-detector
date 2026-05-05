@@ -30,6 +30,8 @@ class DetectionResponse(BaseModel):
     class_id: int
     class_name: str
     has_mask: bool = False
+    xy: Optional[List[List[float]]] = None
+    xyn: Optional[List[List[float]]] = None
 
 
 class DetectionResultResponse(BaseModel):

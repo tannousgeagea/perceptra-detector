@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "perceptra-detector"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unified, production-ready detection and segmentation framework supporting YOLO, DETR, RT-DETR, and custom models."
 authors = [{ name = "Tannous Geagea", email = "tannousgeagea@hotmail.com" }]
 readme = "README.md"

@@ -591,7 +591,9 @@ def result_to_response(result) -> DetectionResultResponse:
             confidence=det.confidence,
             class_id=det.class_id,
             class_name=det.class_name,
-            has_mask=det.mask is not None
+            has_mask=det.mask is not None,
+            xy=det.xy,
+            xyn=det.xyn,
         )
         detections.append(det_response)
     

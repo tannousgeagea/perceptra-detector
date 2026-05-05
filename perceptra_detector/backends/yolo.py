@@ -140,9 +140,16 @@ class YOLODetector(BaseDetector):
             
             # Handle segmentation masks if available
             masks = None
+            masks_xy = None
+            masks_xyn = None
             if hasattr(predictions, 'masks') and predictions.masks is not None:
                 masks = predictions.masks.data.cpu().numpy()
-            
+                # ultralytics exposes pixel-space and normalized polygon contours
+                if hasattr(predictions.masks, 'xy'):
+                    masks_xy = predictions.masks.xy
+                if hasattr(predictions.masks, 'xyn'):
+                    masks_xyn = predictions.masks.xyn
+
             for i, (box, conf, cls_id) in enumerate(zip(xyxy, confidences, class_ids)):
                 bbox = BoundingBox(
                     x1=float(box[0]),
@@ -150,16 +157,19 @@ class YOLODetector(BaseDetector):
                     x2=float(box[2]),
                     y2=float(box[3])
                 )
-                
-                # Get mask if available
+
                 mask = masks[i] if masks is not None else None
-                
+                xy = masks_xy[i].tolist() if masks_xy is not None else None
+                xyn = masks_xyn[i].tolist() if masks_xyn is not None else None
+
                 detection = Detection(
                     bbox=bbox,
                     confidence=float(conf),
                     class_id=int(cls_id),
                     class_name=self.class_names[cls_id],
-                    mask=mask
+                    mask=mask,
+                    xy=xy,
+                    xyn=xyn,
                 )
                 detections.append(detection)
         

@@ -18,6 +18,31 @@ from ..core.schemas import (
 logger = logging.getLogger(__name__)
 
 
+def _mask_to_polygons(mask: np.ndarray, img_w: int, img_h: int):
+    """
+    Convert a binary mask to polygon contour lists.
+
+    Returns (xy, xyn) where xy is [[x,y],...] in pixel coords and
+    xyn is the same normalized to [0,1] by image dimensions.
+    Uses the largest contour only (outermost boundary).
+    """
+    try:
+        import cv2
+    except ImportError:
+        return None, None
+
+    binary = (mask > 0).astype(np.uint8)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return None, None
+
+    # Take the largest contour
+    contour = max(contours, key=cv2.contourArea).reshape(-1, 2)
+    xy = contour.tolist()
+    xyn = [[pt[0] / img_w, pt[1] / img_h] for pt in xy]
+    return xy, xyn
+
+
 @register_backend('rf-detr', ['.pt', '.pth'])
 class RFDETRDetector(BaseDetector):
     """
@@ -225,23 +250,33 @@ class RFDETRDetector(BaseDetector):
         
         if predictions is not None and len(predictions) > 0:
             # Extract data from supervision.Detections
-            xyxy = predictions.xyxy  # numpy array of shape (N, 4)
-            confidences = predictions.confidence  # numpy array of shape (N,)
-            class_ids = predictions.class_id  # numpy array of shape (N,)
-            
-            for box, conf, cls_id in zip(xyxy, confidences, class_ids):
+            xyxy = predictions.xyxy          # (N, 4)
+            confidences = predictions.confidence  # (N,)
+            class_ids = predictions.class_id      # (N,)
+
+            # supervision.Detections carries an optional boolean mask (N, H, W)
+            sv_masks = getattr(predictions, 'mask', None)
+            h, w = original_shape[:2]
+
+            for i, (box, conf, cls_id) in enumerate(zip(xyxy, confidences, class_ids)):
                 bbox = BoundingBox(
                     x1=float(box[0]),
                     y1=float(box[1]),
                     x2=float(box[2]),
                     y2=float(box[3])
                 )
-                
+
+                mask = sv_masks[i] if sv_masks is not None else None
+                xy, xyn = _mask_to_polygons(mask, w, h) if mask is not None else (None, None)
+
                 detection = Detection(
                     bbox=bbox,
                     confidence=float(conf),
                     class_id=int(cls_id),
-                    class_name=self.class_names[cls_id] if cls_id < len(self.class_names) else f"class_{cls_id}"
+                    class_name=self.class_names[cls_id] if cls_id < len(self.class_names) else f"class_{cls_id}",
+                    mask=mask,
+                    xy=xy,
+                    xyn=xyn,
                 )
                 detections.append(detection)
         
